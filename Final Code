@@ -1,0 +1,582 @@
+-- First run without this, if you want to run code again uncomment the code below
+DROP TABLE customer CASCADE CONSTRAINTS;
+DROP TABLE order_details CASCADE CONSTRAINTS;
+DROP TABLE car CASCADE CONSTRAINTS;
+DROP TABLE supplier CASCADE CONSTRAINTS;
+DROP TABLE maintenance CASCADE CONSTRAINTS;
+DROP TABLE billing CASCADE CONSTRAINTS;
+DROP TABLE benefits CASCADE CONSTRAINTS;
+DROP TABLE rents CASCADE CONSTRAINTS;
+DROP TABLE supplies CASCADE CONSTRAINTS;
+DROP TABLE has CASCADE CONSTRAINTS;
+DROP TABLE reduces_price CASCADE CONSTRAINTS;
+DROP TABLE receives CASCADE CONSTRAINTS;
+DROP TABLE provides CASCADE CONSTRAINTS;
+DROP TABLE gives CASCADE CONSTRAINTS;
+DROP TABLE paysfor CASCADE CONSTRAINTS;
+DROP TABLE undergoes CASCADE CONSTRAINTS;
+
+--  Create Tables Below
+CREATE TABLE customer (
+drivers_license VARCHAR2(50) PRIMARY KEY,
+phone_number VARCHAR2(14),
+fullname VARCHAR2(50) NOT NULL UNIQUE,
+address VARCHAR2(70) NOT NULL UNIQUE);
+
+CREATE TABLE order_details (
+reservation_id VARCHAR2(50) PRIMARY KEY,
+fullname VARCHAR2(50),
+start_date VARCHAR2(50) NOT NULL,
+return_date VARCHAR2(50) NOT NULL,
+total_amount FLOAT NOT NULL,
+order_id VARCHAR2(50) NOT NULL,
+foreign key (fullname) references customer(fullname));
+
+CREATE TABLE car (
+vin VARCHAR2(100) PRIMARY KEY,
+licence_plate_num VARCHAR2(10) NOT NULL UNIQUE,
+registration_num INTEGER NOT NULL,
+year_num INTEGER NOT NULL,
+make VARCHAR2(100) NOT NULL,
+model_type VARCHAR2(100) NOT NULL);
+
+CREATE TABLE supplier (
+rental_location_ID VARCHAR2(100) PRIMARY KEY,
+company_name VARCHAR2(100) DEFAULT 'P Motors',
+email VARCHAR2(100) NOT NULL,
+address VARCHAR2(100) NOT NULL,
+phone_num INTEGER NOT NULL);
+
+CREATE TABLE maintenance (
+regular_service FLOAT PRIMARY KEY,
+vin VARCHAR2(100), 
+wheel_allignment FLOAT NOT NULL,
+oil_change FLOAT NOT NULL,
+brake_inspection FLOAT NOT NULL,
+repair_car FLOAT NOT NULL,
+oil_filter_change FLOAT NOT NULL,
+foreign key (vin) references car(vin));
+
+CREATE TABLE billing (
+rental_price FLOAT PRIMARY KEY,
+tax FLOAT DEFAULT 0.13,
+damage_fees FLOAT NOT NULL,
+benefits_sum FLOAT NOT NULL UNIQUE,
+downpayment FLOAT NOT NULL,
+insurance_price FLOAT NOT NULL); 
+
+CREATE TABLE benefits (
+discountPrice FLOAT PRIMARY KEY,
+benefits_sum FLOAT,
+promoOffer FLOAT(7) NOT NULL,
+premiumInsurance FLOAT NOT NULL,
+membership FLOAT(100) NOT NULL,
+foreign key (benefits_sum) references billing(benefits_sum));
+
+CREATE TABLE rents (
+    drivers_license VARCHAR2(50) REFERENCES customer(drivers_license),
+    vin VARCHAR2(100) REFERENCES car(vin),
+    PRIMARY KEY(drivers_license, vin));
+
+CREATE TABLE gives (
+    reservation_id VARCHAR2(50) REFERENCES order_details(reservation_id),
+    rental_location_ID VARCHAR2(100) REFERENCES supplier(rental_location_ID),
+    PRIMARY KEY(reservation_id, rental_location_ID));
+
+CREATE TABLE undergoes (
+    vin VARCHAR2(100) REFERENCES car(vin),
+    regular_service FLOAT REFERENCES maintenance(regular_service),
+    PRIMARY KEY(vin, regular_service));
+
+CREATE TABLE supplies (
+    rental_location_ID VARCHAR2(100) REFERENCES supplier(rental_location_ID),
+    vin VARCHAR2(100) REFERENCES car(vin),
+    PRIMARY KEY(rental_location_ID, vin));
+
+CREATE TABLE paysfor (
+    rental_location_ID VARCHAR2(100) REFERENCES supplier(rental_location_ID),
+    regular_service FLOAT REFERENCES maintenance(regular_service),
+    PRIMARY KEY(rental_location_ID, regular_service));
+
+CREATE TABLE receives (
+    drivers_license VARCHAR2(50) REFERENCES customer(drivers_license),
+    reservation_id VARCHAR2(50) REFERENCES order_details(reservation_id),
+    PRIMARY KEY(drivers_license, reservation_id));
+
+CREATE TABLE has (
+    drivers_license VARCHAR2(50) REFERENCES customer(drivers_license),
+    discountPrice FLOAT REFERENCES benefits(discountPrice),
+    PRIMARY KEY(drivers_license, discountPrice));
+
+CREATE TABLE reduces_price (
+    discountPrice FLOAT REFERENCES benefits(discountPrice),
+    rental_price FLOAT REFERENCES billing(rental_price),
+    PRIMARY KEY(discountPrice, rental_price));
+
+CREATE TABLE provides (
+    rental_price FLOAT REFERENCES billing(rental_price),
+    reservation_id VARCHAR2(50) REFERENCES order_details(reservation_id),
+    PRIMARY KEY(rental_price, reservation_id));
+
+-- Insert Values 
+INSERT INTO customer (drivers_license, phone_number, fullname, address) 
+VALUES ('C2342-12311-43242', '6473241342', 'George Ven', '64 Lemon Avenue');
+
+INSERT INTO customer (drivers_license, phone_number, fullname, address) 
+VALUES ('Q3299-43221-48765', '4371115543', 'Allen Dale', '88 Mouse Drive');
+
+INSERT INTO customer (drivers_license, phone_number, fullname, address) 
+VALUES ('D9988-34325-97643', '4165238998', 'Tim Lenny', '23 Flower Lane');
+
+INSERT INTO customer (drivers_license, phone_number, fullname, address) 
+VALUES ('C6324-74583-85349', '6473534123', 'Marshall Lune', '1 Light Avenue');
+
+INSERT INTO customer (drivers_license, phone_number, fullname, address) 
+VALUES ('S4353-53452-53463', '4374239952', 'Ross Jones', '46 Rose Drive');
+
+INSERT INTO customer (drivers_license, phone_number, fullname, address) 
+VALUES ('B4325-45345-90954', '4164332111', 'Josh Role', '9 Horse Lane');
+
+INSERT INTO customer (drivers_license, phone_number, fullname, address) 
+VALUES ('K11111-22222-33456', '6475421425', 'Tammy Wall', '43 Hill Trail');
+
+INSERT INTO order_details (reservation_id, fullname, start_date, return_date, total_amount, order_id)
+VALUES ('M4353', 'George Ven', '08/16/2022', '08/23/2022', 1130.00, 'A1212Z9');
+
+INSERT INTO order_details (reservation_id, fullname, start_date, return_date, total_amount, order_id)
+VALUES ('M4775', 'Allen Dale', '02/04/2022', '03/21/2022', 847.50, 'A2322Z2');
+
+INSERT INTO order_details (reservation_id, fullname, start_date, return_date, total_amount, order_id)
+VALUES ('M4213', 'Tim Lenny', '03/02/2022', '05/10/2022', 3616.00, 'A4355Z1');
+
+INSERT INTO order_details (reservation_id, fullname, start_date, return_date, total_amount, order_id)
+VALUES ('M4901', 'Marshall Lune', '07/05/2022', '07/12/2022', 5392.00 , 'A5456Z2');
+
+INSERT INTO order_details (reservation_id, fullname, start_date, return_date, total_amount, order_id)
+VALUES ('M4212', 'Ross Jones', '10/16/2022', '11/28/2022', 4746.00 , 'A9583Z1');
+
+INSERT INTO order_details (reservation_id, fullname, start_date, return_date, total_amount, order_id)
+VALUES('M4968', 'Josh Role', '12/16/2022', '12/27/2022', 3955.00 , 'A2231Z8');
+
+INSERT INTO order_details (reservation_id, fullname, start_date, return_date, total_amount, order_id)
+VALUES ('M4456', 'Tammy Wall', '06/01/2022', '07/20/2022', 361.60 , 'A9675Z7');
+
+INSERT INTO car (vin, licence_plate_num, registration_num, year_num, make, model_type)
+VALUES ('4Y1SL65848Z411439', 'BSDS 432', 14829934, 2001, 'Toyota', 'Camry');
+
+INSERT INTO car (vin, licence_plate_num, registration_num, year_num, make, model_type)
+VALUES ('6Z1ST34248I411675', 'FRES 487', 64429339, 2012, 'Toyota', 'Corolla');
+
+INSERT INTO car (vin, licence_plate_num, registration_num, year_num, make, model_type)
+VALUES ('2A3WA65848Z423430', 'AXAB 321', 549873213, 2018, 'Lexus', 'NX');
+
+INSERT INTO car (vin, licence_plate_num, registration_num, year_num, make, model_type)
+VALUES ('9R2TA43218V692259', 'LOKP 980', 754839210, 1999, 'Nissan', 'Altima');
+
+INSERT INTO car (vin, licence_plate_num, registration_num, year_num, make, model_type)
+VALUES ('3Z2TL2167AZ321571', 'BTXB 192', 837219232, 2002, 'KIA', 'Stinger');
+
+INSERT INTO car (vin, licence_plate_num, registration_num, year_num, make, model_type)
+VALUES ('1A2SL65848Z845328', 'MJSW 232', 283753910, 2021, 'BMW', 'X5');
+
+INSERT INTO car (vin, licence_plate_num, registration_num, year_num, make, model_type)
+VALUES ('2M2LA73212J781234', 'PADA 920', 384739025, 2016, 'Dodge', 'Charger');
+
+INSERT INTO supplier (rental_location_ID, company_name, email, address, phone_num)
+VALUES ('A1', 'P Motors', 'pmotors@gmail.com', '1001 Parkway Dr', 6479875432);
+
+INSERT INTO maintenance (regular_service, vin, wheel_allignment, oil_change, brake_inspection, repair_car, oil_filter_change)
+VALUES (100.00,'4Y1SL65848Z411439', 50.00, 40.00, 25.00, 500.00, 75.00);
+
+INSERT INTO maintenance (regular_service, vin, wheel_allignment, oil_change, brake_inspection, repair_car, oil_filter_change)
+VALUES (150.00,'6Z1ST34248I411675', 100.00, 30.00, 40.00, 800.00, 80.00);
+
+INSERT INTO maintenance (regular_service, vin, wheel_allignment, oil_change, brake_inspection, repair_car, oil_filter_change)
+VALUES (400.00,'2A3WA65848Z423430', 200.00, 100.00, 75.00, 1000.00, 120.00);
+
+INSERT INTO maintenance (regular_service, vin, wheel_allignment, oil_change, brake_inspection, repair_car, oil_filter_change)
+VALUES (125.00,'9R2TA43218V692259', 40.00, 30.00, 15.00, 400.00, 55.00);
+
+INSERT INTO maintenance (regular_service, vin, wheel_allignment, oil_change, brake_inspection, repair_car, oil_filter_change)
+VALUES (250.00,'3Z2TL2167AZ321571', 80.00, 70.00, 35.00, 700.00, 70.00);
+
+INSERT INTO maintenance (regular_service, vin, wheel_allignment, oil_change, brake_inspection, repair_car, oil_filter_change)
+VALUES (300.00,'1A2SL65848Z845328', 45.00, 70.00, 45.00, 900.00, 95.00);
+
+INSERT INTO maintenance (regular_service, vin, wheel_allignment, oil_change, brake_inspection, repair_car, oil_filter_change)
+VALUES (350.00,'2M2LA73212J781234', 120.00, 70.00, 80.00, 950.00, 90.00);
+
+INSERT INTO billing (rental_price, tax, damage_fees, benefits_sum, downpayment, insurance_price)
+VALUES (200.00, 0.13, 500.00, 100.00, 40.00, 100.00); 
+
+INSERT INTO billing (rental_price, tax, damage_fees, benefits_sum, downpayment, insurance_price)
+VALUES (300.00, 0.13, 200.00, 50.00, 30.00, 100.00); 
+
+INSERT INTO billing (rental_price, tax, damage_fees, benefits_sum, downpayment, insurance_price)
+VALUES (1000.00, 0.13, 1400.00, 150.00, 150.00, 100.00); 
+
+INSERT INTO billing (rental_price, tax, damage_fees, benefits_sum, downpayment, insurance_price)
+VALUES (1600.00, 0.13, 3000.00, 200.00, 1000.00, 100.00); 
+
+INSERT INTO billing (rental_price, tax, damage_fees, benefits_sum, downpayment, insurance_price)
+VALUES (1500.00, 0.13, 2500.00, 400.00, 600.00, 100.00);
+
+INSERT INTO billing (rental_price, tax, damage_fees, benefits_sum, downpayment, insurance_price)
+VALUES (1800.00, 0.13, 1900.00, 700.00, 800.00, 100.00);
+
+INSERT INTO billing (rental_price, tax, damage_fees, benefits_sum, downpayment, insurance_price)
+VALUES (90.00, 0.13, 150.00, 20.00, 60.00, 100.00);
+
+INSERT INTO benefits(discountPrice, benefits_sum, promoOffer, premiumInsurance, membership)
+VALUES (19.99, 100.00, 14.99, 50.00, 20.00);
+
+INSERT INTO benefits(discountPrice, benefits_sum, promoOffer, premiumInsurance, membership)
+VALUES (14.99, 50.00, 12.99, 40.00, 20.00);
+
+INSERT INTO benefits(discountPrice, benefits_sum, promoOffer, premiumInsurance, membership)
+VALUES (31.99, 150.00, 12.99, 50.00, 20.00);
+
+INSERT INTO benefits(discountPrice, benefits_sum, promoOffer, premiumInsurance, membership)
+VALUES (29.99, 200.00, 34.99, 50.00, 20.00);
+
+INSERT INTO benefits(discountPrice, benefits_sum, promoOffer, premiumInsurance, membership)
+VALUES (59.99, 400.00, 24.99, 50.00, 20.00);
+
+INSERT INTO benefits(discountPrice, benefits_sum, promoOffer, premiumInsurance, membership)
+VALUES (78.99, 700.00, 32.99, 50.00, 20.00);
+
+INSERT INTO benefits(discountPrice, benefits_sum, promoOffer, premiumInsurance, membership)
+VALUES (89.99, 20.00, 39.99, 50.00, 20.00);
+
+INSERT INTO rents (drivers_license, vin) 
+VALUES ('C2342-12311-43242', '4Y1SL65848Z411439');
+
+INSERT INTO rents (drivers_license, vin) 
+VALUES ('Q3299-43221-48765', '6Z1ST34248I411675');
+
+INSERT INTO rents (drivers_license, vin) 
+VALUES ('D9988-34325-97643', '2A3WA65848Z423430');
+
+INSERT INTO rents (drivers_license, vin) 
+VALUES ('C6324-74583-85349', '9R2TA43218V692259');
+
+INSERT INTO rents (drivers_license, vin) 
+VALUES ('S4353-53452-53463', '3Z2TL2167AZ321571');
+
+INSERT INTO rents (drivers_license, vin) 
+VALUES ('B4325-45345-90954', '1A2SL65848Z845328');
+
+INSERT INTO rents (drivers_license, vin) 
+VALUES ('K11111-22222-33456', '2M2LA73212J781234');
+
+INSERT INTO gives (reservation_id, rental_location_ID) 
+VALUES ('M4353', 'A1');
+
+INSERT INTO gives (reservation_id, rental_location_ID) 
+VALUES ('M4775', 'A1');
+
+INSERT INTO gives (reservation_id, rental_location_ID) 
+VALUES ('M4213', 'A1');
+
+INSERT INTO gives (reservation_id, rental_location_ID) 
+VALUES ('M4901', 'A1');
+
+INSERT INTO gives (reservation_id, rental_location_ID) 
+VALUES ('M4212', 'A1');
+
+INSERT INTO gives (reservation_id, rental_location_ID) 
+VALUES ('M4968', 'A1');
+
+INSERT INTO gives (reservation_id, rental_location_ID) 
+VALUES ('M4456', 'A1');
+
+INSERT INTO provides (rental_price, reservation_id) 
+VALUES (200, 'M4353');
+
+INSERT INTO provides (rental_price, reservation_id) 
+VALUES (300, 'M4775');
+
+INSERT INTO provides (rental_price, reservation_id) 
+VALUES (1000, 'M4213');
+
+INSERT INTO provides (rental_price, reservation_id) 
+VALUES (1600, 'M4901');
+
+INSERT INTO provides (rental_price, reservation_id) 
+VALUES (1500, 'M4212');
+
+INSERT INTO provides (rental_price, reservation_id) 
+VALUES (1800, 'M4968');
+
+INSERT INTO provides (rental_price, reservation_id) 
+VALUES (90, 'M4456');
+
+INSERT INTO receives (drivers_license, reservation_id) 
+VALUES ('C2342-12311-43242', 'M4353');
+
+INSERT INTO receives (drivers_license, reservation_id) 
+VALUES ('Q3299-43221-48765', 'M4775');
+
+INSERT INTO receives (drivers_license, reservation_id) 
+VALUES ('D9988-34325-97643', 'M4213');
+
+INSERT INTO receives (drivers_license, reservation_id) 
+VALUES ('C6324-74583-85349', 'M4901');
+
+INSERT INTO receives (drivers_license, reservation_id) 
+VALUES ('S4353-53452-53463', 'M4212');
+
+INSERT INTO receives (drivers_license, reservation_id) 
+VALUES ('B4325-45345-90954', 'M4968');
+
+INSERT INTO receives (drivers_license, reservation_id) 
+VALUES ('K11111-22222-33456', 'M4456');
+
+INSERT INTO undergoes (vin, regular_service)
+VALUES ('4Y1SL65848Z411439', 100.00);
+
+INSERT INTO undergoes (vin, regular_service)
+VALUES ('6Z1ST34248I411675', 150.00);
+
+INSERT INTO undergoes (vin, regular_service)
+VALUES ('2A3WA65848Z423430', 400.00);
+
+INSERT INTO undergoes (vin, regular_service)
+VALUES ('9R2TA43218V692259', 250.00);
+
+INSERT INTO undergoes (vin, regular_service)
+VALUES ('3Z2TL2167AZ321571', 300.00);
+
+INSERT INTO undergoes (vin, regular_service)
+VALUES ('1A2SL65848Z845328', 350.00);
+
+INSERT INTO undergoes (vin, regular_service)
+VALUES ('2M2LA73212J781234', 100.00);
+
+INSERT INTO has (drivers_license, discountPrice)
+VALUES ('C2342-12311-43242', 19.99);
+
+INSERT INTO has (drivers_license, discountPrice)
+VALUES ('Q3299-43221-48765', 14.99);
+
+INSERT INTO has (drivers_license, discountPrice)
+VALUES ('D9988-34325-97643', 31.99);
+
+INSERT INTO has (drivers_license, discountPrice)
+VALUES ('C6324-74583-85349', 29.99);
+
+INSERT INTO has (drivers_license, discountPrice)
+VALUES ('S4353-53452-53463', 78.99);
+
+INSERT INTO has (drivers_license, discountPrice)
+VALUES ('B4325-45345-90954', 59.99);
+
+INSERT INTO has (drivers_license, discountPrice)
+VALUES ('K11111-22222-33456', 89.99);
+
+INSERT INTO supplies (rental_location_ID, vin)
+VALUES ('A1', '4Y1SL65848Z411439');
+
+INSERT INTO supplies (rental_location_ID, vin)
+VALUES ('A1', '6Z1ST34248I411675');
+
+INSERT INTO supplies (rental_location_ID, vin)
+VALUES ('A1', '2A3WA65848Z423430');
+
+INSERT INTO supplies (rental_location_ID, vin)
+VALUES ('A1', '9R2TA43218V692259');
+
+INSERT INTO supplies (rental_location_ID, vin)
+VALUES ('A1', '3Z2TL2167AZ321571');
+
+INSERT INTO supplies (rental_location_ID, vin)
+VALUES ('A1', '1A2SL65848Z845328');
+
+INSERT INTO supplies (rental_location_ID, vin)
+VALUES ('A1', '2M2LA73212J781234');
+
+INSERT INTO paysfor (rental_location_ID, regular_service)
+VALUES ('A1', 100);
+
+INSERT INTO paysfor (rental_location_ID, regular_service)
+VALUES ('A1', 150);
+
+INSERT INTO paysfor (rental_location_ID, regular_service)
+VALUES ('A1', 400);
+
+INSERT INTO paysfor (rental_location_ID, regular_service)
+VALUES ('A1', 125);
+
+INSERT INTO paysfor (rental_location_ID, regular_service)
+VALUES ('A1', 250);
+
+INSERT INTO paysfor (rental_location_ID, regular_service)
+VALUES ('A1', 300);
+
+INSERT INTO paysfor (rental_location_ID, regular_service)
+VALUES ('A1', 350);
+
+INSERT INTO reduces_price (discountPrice, rental_price)
+VALUES (19.99, 200.00);
+
+INSERT INTO reduces_price (discountPrice, rental_price)
+VALUES (14.99, 300.00);
+
+INSERT INTO reduces_price (discountPrice, rental_price)
+VALUES (31.99, 1000.00);
+
+INSERT INTO reduces_price (discountPrice, rental_price)
+VALUES (29.99, 1600.00);
+
+INSERT INTO reduces_price (discountPrice, rental_price)
+VALUES (59.99, 1500.00);
+
+INSERT INTO reduces_price (discountPrice, rental_price)
+VALUES (78.99, 1800.00);
+
+INSERT INTO reduces_price (discountPrice, rental_price)
+VALUES (89.99, 90.00);
+
+
+-- SIMPLE QUERIES (Assignment 4 PART 1)
+
+-- Displays drivers_license and fullname in ascending order of fullname in customer table
+SELECT DISTINCT drivers_license, fullname 
+FROM customer 
+ORDER BY fullname ASC;
+
+-- Displays car table when year_num is less then 2014 and in ascending order of year_num
+SELECT DISTINCT * 
+FROM car 
+WHERE year_num < 2014
+ORDER BY year_num DESC;
+
+-- Displays maintenance prices that are restricted to the following constraints: Oil filter change price to be greater than 200 and wheel allignment to be greater than 100 OR Brake inspection price to be less than 50 and Car repair to be greater than 500. The table will be listed in increasing order by regular service pricing.
+SELECT DISTINCT * 
+FROM maintenance
+WHERE (oil_filter_change > 200 and wheel_allignment > 100) OR (brake_inspection < 50 and repair_car > 500)
+ORDER BY regular_service ASC;
+
+-- In order_details table creates a variable TotalRevenue which acts as a sum of the total amount of order details prices and is listed in decreasing order.
+SELECT DISTINCT order_ID, SUM(total_amount) as TotalRevenue 
+FROM order_details
+GROUP BY order_ID
+ORDER BY TotalRevenue desc;
+
+-- In billing table Total is created which gets the total sum from the prices of the billing attributes after tax
+SELECT DISTINCT (rental_price + damage_fees + benefits_sum + downpayment + insurance_price) + ((rental_price + damage_fees + benefits_sum + downpayment + insurance_price) * tax) AS Total 
+FROM billing
+ORDER BY Total DESC;
+
+-- In billing table displays if rental_price is less then 2000 and greater then 500 and if damage_fees greater then 200 and if downpayment is greater then 500
+SELECT DISTINCT * 
+FROM billing 
+WHERE rental_price < 2000 AND rental_price > 500 AND damage_fees > 2000 AND downpayment > 500;
+
+--Displays emails in ascending order from supplier table
+SELECT DISTINCT * 
+FROM supplier
+ORDER BY email ASC;
+
+-- displays benefits table when discountPrice is less then 60 in the order of promoOffer in ascending order
+SELECT DISTINCT * FROM benefits
+WHERE discountPrice < 60
+ORDER BY promoOffer ASC;
+
+
+-- VIEWS and ADVANCED JOIN QUERIES (Assignment 4 PART 2)
+
+-- DROP commands for view table
+DROP VIEW new_luxury_car;
+DROP VIEW order_total_amount;
+DROP VIEW Customer_Rental_Dates;
+
+-- VIEW table that gets cars that are luxury brands and year of the car is greater than 2016
+CREATE VIEW new_luxury_car(luxury_year_num, luxury_make, luxury_model_type) AS
+SELECT DISTINCT year_num, make, model_type
+FROM car
+WHERE year_num > 2016 AND (make = 'BMW' OR make = 'Lexus');
+
+-- selects new_luxury_car view 
+SELECT *
+FROM new_luxury_car;
+
+-- VIEW table that gets order_id and total_amount such that it has to be greater then 500
+CREATE VIEW order_total_amount AS
+SELECT DISTINCT order_id, total_amount
+FROM order_details
+WHERE total_amount > 500;
+
+-- selects order_total_amount view
+SELECT *
+FROM order_total_amount;
+
+-- VIEW table that gets the startdate and returndate of customer as well as orderID
+CREATE VIEW Customer_Rental_Dates AS
+SELECT order_details.order_ID, order_details.start_date, order_details.return_date
+FROM order_details;
+
+-- selects Customer_Rental_Dates
+SELECT *
+FROM Customer_Rental_Dates;
+
+-- Join for customer and order details full name, gets fullname and reservation id 
+SELECT customer.fullname, order_details.reservation_id
+FROM customer, order_details
+WHERE customer.fullname = order_details.fullname;
+
+-- Join for car and maintenance vin, gets vin and regular service
+SELECT car.vin, maintenance.regular_service
+FROM car, maintenance
+WHERE car.vin = maintenance.vin;
+
+-- Join for benefits and billing benefits sum, gets benefits sum and rental price
+SELECT benefits.benefits_sum, billing.rental_price
+FROM benefits, billing
+WHERE benefits.benefits_sum = billing.benefits_sum;
+
+-- ADVANCED QUERIES (Assignment 5)
+
+-- Prints count, minimum, maximum and sum of benefits_sum attribute using aggregate functions 
+SELECT COUNT(benefits_sum), MIN(benefits_sum), MAX(benefits_sum), SUM(benefits_sum)
+FROM billing;
+
+-- Prints the average, variance and standard deviation of total_amount
+SELECT AVG(total_amount), VARIANCE(total_amount), STDDEV(total_amount)
+FROM order_details;
+
+-- Prints the customers names who pay for than 1000 in damage fees
+SELECT fullname
+FROM customer 
+WHERE EXISTS(SELECT total_amount 
+    from order_details 
+    where order_details.fullname = customer.fullname 
+        AND total_amount >1000);
+
+-- Prints the union of fullname and licence_plate_num
+SELECT fullname
+FROM customer
+UNION ALL
+    SELECT licence_plate_num FROM car;       
+    
+-- Does not print values in which year_num is in 2016 and 2018
+SELECT licence_plate_num, make, model_type, year_num 
+from car
+WHERE year_num 
+    NOT IN(2016, 2018);
+
+-- Uses minus to get benefits sum that is less than 200
+SELECT *
+FROM billing
+MINUS 
+SELECT b.*
+    FROM billing b, benefits be
+        WHERE b.benefits_sum = be.benefits_sum
+            AND b.benefits_sum > 200;
+
+-- Prints average of total_amount using group by and having
+SELECT order_ID, AVG(total_amount) 
+FROM order_details
+GROUP BY order_ID
+HAVING AVG(total_amount) > (SELECT AVG(total_amount) 
+    FROM order_details);
